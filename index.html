@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kupoli Alchemy Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Montserrat:wght@400;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #0a0e17 url('https://images.unsplash.com/photo-1534447677768-be436bb09401?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80') no-repeat center center fixed;
+            background-size: cover;
+            color: #f0e6d2;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .luxury-text {
+            font-family: 'Cinzel Decorative', cursive;
+            color: #d4af37;
+            text-shadow: 0 2px 10px rgba(212, 175, 55, 0.5);
+        }
+
+        .game-container {
+            width: 90%;
+            max-width: 800px;
+            background: rgba(10, 14, 23, 0.85);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            box-shadow: 0 0 40px rgba(0, 150, 255, 0.3);
+            backdrop-filter: blur(5px);
+            margin: 20px 0;
+        }
+
+        .cocktail-img {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin: 20px auto;
+            border: 2px solid #d4af37;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            transition: transform 0.3s;
+        }
+
+        .cocktail-img:hover {
+            transform: scale(1.05);
+        }
+
+        .cocktail-option {
+            cursor: pointer;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 15px;
+            transition: all 0.3s;
+        }
+
+        .cocktail-option:hover {
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .ingredient-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .ingredient {
+            padding: 10px;
+            background: rgba(30, 35, 50, 0.7);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        .ingredient.selected {
+            background: rgba(0, 150, 255, 0.3);
+            border: 1px solid #0096ff;
+            box-shadow: 0 0 10px rgba(0, 150, 255, 0.3);
+        }
+
+        button {
+            background: linear-gradient(135deg, #d4af37 0%, #f0e6d2 100%);
+            color: #0a0e17;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 15px 5px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .active {
+            display: block;
+        }
+
+        .emoji {
+            font-size: 3rem;
+            margin: 15px 0;
+            display: inline-block;
+        }
+
+        .happy {
+            animation: bounce 1s infinite;
+        }
+
+        .sad {
+            animation: shake 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(5deg); }
+            75% { transform: rotate(-5deg); }
+        }
+
+        #music-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(212, 175, 55, 0.7);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s;
+        }
+
+        #music-control:hover {
+            transform: scale(1.1);
+        }
+
+        /* Modal styling */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 14, 23, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background: rgba(20, 25, 40, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            border: 2px solid #d4af37;
+        }
+
+        .cocktail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        #timer {
+            font-size: 1.5rem;
+            margin: 15px 0;
+            color: #d4af37;
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* New styles for ingredient hints and images */
+        .ingredient-hint {
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(212, 175, 55, 0.1);
+            border-left: 3px solid #d4af37;
+            display: none;
+        }
+        
+        .ingredient-with-image {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .ingredient-emoji {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        .ingredient-image {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 5px;
+            border: 1px solid #d4af37;
+        }
+        
+        /* Hint levels styling */
+        .hint-level {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: rgba(212, 175, 55, 0.3);
+            margin: 0 5px;
+        }
+        
+        .hint-level.active {
+            background-color: #d4af37;
+        }
+        
+        .hint-container {
+            margin: 15px 0;
+        }
+        
+        /* New styles for name input and email form */
+        input {
+            background: rgba(30, 35, 50, 0.7);
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            color: #f0e6d2;
+            padding: 12px 15px;
+            border-radius: 25px;
+            margin: 10px 0;
+            width: 80%;
+            max-width: 300px;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        input::placeholder {
+            color: rgba(240, 230, 210, 0.6);
+        }
+        
+        .certificate-option {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 10px;
+        }
+        
+        .certificate-form {
+            display: none;
+            margin-top: 15px;
+        }
+        
+        .certificate-form.active {
+            display: block;
+        }
+        
+        .certificate-preview {
+            margin: 20px auto;
+            padding: 20px;
+            background: rgba(20, 25, 40, 0.9);
+            border: 2px solid #d4af37;
+            border-radius: 15px;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .certificate-preview h3 {
+            font-family: 'Cinzel Decorative', cursive;
+            color: #d4af37;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Music Player (Smooth Classical) -->
+    <audio id="background-music" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg">
+    </audio>
+    <div id="music-control" onclick="toggleMusic()">🎵</div>
+
+    <div class="game-container">
+        <!-- Welcome Screen -->
+        <div class="screen active" id="welcome-screen">
+            <h1 class="luxury-text">Kupoli Alchemy Lab</h1>
+            <p>Experience the art of celestial mixology</p>
+            <img src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80" class="cocktail-img" alt="Signature Cocktail">
+            <button onclick="showNameScreen()">Begin Challenge</button>
+        </div>
+        
+        <!-- Name Input Screen -->
+        <div class="screen" id="name-screen">
+            <h1 class="luxury-text">Enter Your Name</h1>
+            <p>Please provide your name to personalize your experience</p>
+            <input type="text" id="customer-name" placeholder="Your name">
+            <button onclick="saveName()">Continue</button>
+        </div>
+        
+        <!-- Cocktail Selection -->
+        <div class="screen" id="cocktail-selection">
+            <h1 class="luxury-text">Choose Your Elixir, <span id="display-name"></span></h1>
+            
+            <div class="cocktail-grid">
+                <div class="cocktail-option" onclick="selectCocktail('rose-negroni')">
+                    <h3>Rosé Negroni</h3>
+                    <img src="https://images.unsplash.com/photo-1551751299-1b51cab2694c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80" class="cocktail-img" alt="Rosé Negroni">
+                </div>
+                
+                <div class="cocktail-option" onclick="selectCocktail('lemon-mead')">
+                    <h3>Lemon Mead</h3>
+                    <img src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80" class="cocktail-img" alt="Lemon Mead">
+                </div>
+                
+                <div class="cocktail-option" onclick="selectCocktail('northern-lights')">
+                    <h3>Northern Lights</h3>
+                    <img src="https://images.unsplash.com/photo-1514361892635-6b07e31e75f9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80" class="cocktail-img" alt="Northern Lights">
+                </div>
+                
+                <div class="cocktail-option" onclick="selectCocktail('midnight-sun')">
+                    <h3>Midnight Sun</h3>
+                    <img src="https://images.unsplash.com/photo-1470337458703-46ad1756a187?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80" class="cocktail-img" alt="Midnight Sun">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Game Screen -->
+        <div class="screen" id="game-screen">
+            <h1 class="luxury-text" id="cocktail-name"></h1>
+            <img id="cocktail-image" class="cocktail-img" src="" alt="Cocktail">
+            <div id="timer">03:00</div>
+            
+            <h3>Select the correct ingredients:</h3>
+            <div class="ingredient-grid" id="ingredients"></div>
+            
+            <div class="hint-container">
+                <span class="hint-level" id="hint-level-1"></span>
+                <span class="hint-level" id="hint-level-2"></span>
+                <span class="hint-level" id="hint-level-3"></span>
+            </div>
+            
+            <div id="hint-message" class="ingredient-hint"></div>
+            
+            <button onclick="checkAnswer()">Submit</button>
+            <div id="result"></div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal" id="success-modal" style="display: none;">
+        <div class="modal-content">
+            <h1 class="luxury-text">Congratulations, <span id="success-name"></span>!</h1>
+            <div class="emoji happy">🥂</div>
+            <img id="success-image" class="cocktail-img" src="" alt="Success">
+            <p>You've successfully crafted the <span id="success-cocktail-name"></span>!</p>
+            <p><strong>Show this screen at Kupoli Bar for your special reward</strong></p>
+            <p id="cocktail-description"></p>
+            
+            <div class="certificate-option">
+                <p>Would you like a digital certificate sent to your email?</p>
+                <button onclick="showCertificateForm()">Yes, Please!</button>
+                <button onclick="playAgain()">No Thanks</button>
+                
+                <div id="certificate-form" class="certificate-form">
+                    <input type="email" id="customer-email" placeholder="Your email address">
+                    <button onclick="sendCertificate()">Send Certificate</button>
+                    <div id="certificate-status"></div>
+                    
+                    <div class="certificate-preview" id="certificate-preview">
+                        <h3>Certificate of Mixology Excellence</h3>
+                        <p>This certifies that <span id="cert-name"></span></p>
+                        <p>has successfully mastered the art of crafting</p>
+                        <p><strong id="cert-cocktail"></strong></p>
+                        <p>at the Kupoli Alchemy Lab</p>
+                        <p id="cert-date"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fail Modal -->
+    <div class="modal" id="fail-modal" style="display: none;">
+        <div class="modal-content">
+            <h1 class="luxury-text">Try Again, <span id="fail-name"></span></h1>
+            <div class="emoji sad">😞</div>
+            <p id="fail-message"></p>
+            <button onclick="restartGame()">Try Again</button>
+            <button onclick="selectNewCocktail()">New Drink</button>
+        </div>
+    </div>
+
+    <script>
+        // Game data with reliable image URLs
+        const cocktails = {
+            'rose-negroni': {
+                name: 'Rosé Negroni',
+                image: 'https://images.unsplash.com/photo-1551751299-1b51cab2694c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80',
+                correct: ['La Quintinye', 'Nonino', 'Gin', 'Grapefruit', 'Blackberry'],
+                allIngredients: ['La Quintinye', 'Nonino', 'Gin', 'Grapefruit', 'Blackberry', 'Campari', 'Vermouth', 'Orange'],
+                description: 'A refreshing twist on the classic Negroni with floral notes and citrus zest. Perfect for warm evenings under the Finnish midnight sun.',
+                ingredientImages: {
+                    'La Quintinye': '🍷',
+                    'Nonino': '🍸',
+                    'Gin': '🍶',
+                    'Grapefruit': '🍊',
+                    'Blackberry': '🫐',
+                    'Campari': '🍒',
+                    'Vermouth': '🍷',
+                    'Orange': '🍊'
+                }
+            },
+            'lemon-mead': {
+                name: 'Lemon Mead',
+                image: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80',
+                correct: ['Whisky', 'Peach liqueur', 'Lemon', 'Brown sugar', 'Rosemary'],
+                allIngredients: ['Whisky', 'Peach liqueur', 'Lemon', 'Brown sugar', 'Rosemary', 'Honey', 'Ginger', 'Mint'],
+                description: 'A Finnish-inspired creation blending whisky with citrus and herbal notes for a refreshing experience that dances on the palate.',
+                ingredientImages: {
+                    'Whisky': '🥃',
+                    'Peach liqueur': '🍑',
+                    'Lemon': '🍋',
+                    'Brown sugar': '🍚',
+                    'Rosemary': '🌿',
+                    'Honey': '🍯',
+                    'Ginger': '🫚',
+                    'Mint': '🌱'
+                }
+            },
+            'northern-lights': {
+                name: 'Northern Lights',
+                image: 'https://images.unsplash.com/photo-1514361892635-6b07e31e75f9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80',
+                correct: ['Vodka', 'Blue Curaçao', 'Lime', 'Elderflower', 'Sparkling water'],
+                allIngredients: ['Vodka', 'Blue Curaçao', 'Lime', 'Elderflower', 'Sparkling water', 'Gin', 'Tonic', 'Cucumber'],
+                description: 'An ethereal blue cocktail that captures the magic of the aurora borealis with crisp, floral flavors and a refreshing finish.',
+                ingredientImages: {
+                    'Vodka': '🍸',
+                    'Blue Curaçao': '🔵',
+                    'Lime': '🍈',
+                    'Elderflower': '🌸',
+                    'Sparkling water': '💧',
+                    'Gin': '🍶',
+                    'Tonic': '🥤',
+                    'Cucumber': '🥒'
+                }
+            },
+            'midnight-sun': {
+                name: 'Midnight Sun',
+                image: 'https://images.unsplash.com/photo-1470337458703-46ad1756a187?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80',
+                correct: ['Aperol', 'Prosecco', 'Blood orange', 'Vanilla syrup', 'Basil'],
+                allIngredients: ['Aperol', 'Prosecco', 'Blood orange', 'Vanilla syrup', 'Basil', 'Campari', 'Soda', 'Lemon'],
+                description: 'A radiant cocktail that celebrates the never-setting summer sun of Lapland with vibrant citrus and herbal complexity.',
+                ingredientImages: {
+                    'Aperol': '🍊',
+                    'Prosecco': '🥂',
+                    'Blood orange': '🍊',
+                    'Vanilla syrup': '🍯',
+                    'Basil': '🌿',
+                    'Campari': '🍒',
+                    'Soda': '🥤',
+                    'Lemon': '🍋'
+                }
+            }
+        };
+
+        // Music control - smoother classical piece
+        const music = document.getElementById('background-music');
+        // Start with music paused to comply with browser autoplay policies
+        music.pause();
+        
+        function toggleMusic() {
+            if (music.paused) {
+                // Only play after user interaction
+                music.play().catch(e => console.log("Audio play failed:", e));
+                document.getElementById('music-control').textContent = '🔊';
+            } else {
+                music.pause();
+                document.getElementById('music-control').textContent = '🎵';
+            }
+        }
+
+        // Game logic
+        let currentCocktail, selectedIngredients = [], timeLeft = 180, timer;
+        let wrongAttempts = 0;
+        let customerName = "";
+
+        function showNameScreen() {
+            document.getElementById('welcome-screen').classList.remove('active');
+            document.getElementById('name-screen').classList.add('active');
+        }
+
+        function saveName() {
+            const nameInput = document.getElementById('customer-name');
+            if (nameInput.value.trim() === "") {
+                alert("Please enter your name to continue");
+                return;
+            }
+            customerName = nameInput.value.trim();
+            startGame();
+        }
+
+        function startGame() {
+            document.getElementById('name-screen').classList.remove('active');
+            document.getElementById('cocktail-selection').classList.add('active');
+            document.getElementById('display-name').textContent = customerName;
+        }
+
+        function selectCocktail(cocktailId) {
+            currentCocktail = cocktails[cocktailId];
+            document.getElementById('cocktail-selection').classList.remove('active');
+            document.getElementById('game-screen').classList.add('active');
+            
+            document.getElementById('cocktail-name').textContent = currentCocktail.name;
+            document.getElementById('cocktail-image').src = currentCocktail.image;
+            
+            // Setup ingredients with images/emojis
+            const container = document.getElementById('ingredients');
+            container.innerHTML = '';
+            currentCocktail.allIngredients.forEach(ing => {
+                const el = document.createElement('div');
+                el.className = 'ingredient ingredient-with-image';
+                
+                // Add image/emoji representation
+                const imgSpan = document.createElement('span');
+                if (currentCocktail.ingredientImages && currentCocktail.ingredientImages[ing]) {
+                    imgSpan.className = 'ingredient-emoji';
+                    imgSpan.textContent = currentCocktail.ingredientImages[ing];
+                } else {
+                    imgSpan.className = 'ingredient-emoji';
+                    imgSpan.textContent = '❓';
+                }
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = ing;
+                
+                el.appendChild(imgSpan);
+                el.appendChild(nameSpan);
+                
+                el.onclick = function() {
+                    this.classList.toggle('selected');
+                    if (this.classList.contains('selected')) {
+                        selectedIngredients.push(ing);
+                    } else {
+                        selectedIngredients = selectedIngredients.filter(i => i !== ing);
+                    }
+                };
+                container.appendChild(el);
+            });
+            
+            // Reset game state
+            selectedIngredients = [];
+            timeLeft = 180;
+            wrongAttempts = 0;
+            updateTimer();
+            clearInterval(timer);
+            timer = setInterval(updateTimer, 1000);
+            
+            // Reset hint display
+            document.getElementById('hint-message').style.display = 'none';
+            document.getElementById('hint-message').textContent = '';
+            document.getElementById('hint-level-1').classList.remove('active');
+            document.getElementById('hint-level-2').classList.remove('active');
+            document.getElementById('hint-level-3').classList.remove('active');
+        }
+
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                showFail("Time's up! Try again.");
+                return;
+            }
+            timeLeft--;
+        }
+
+        function checkAnswer() {
+            const correct = currentCocktail.correct.length === selectedIngredients.length && 
+                          currentCocktail.correct.every(ing => selectedIngredients.includes(ing));
+            
+            if (correct) {
+                clearInterval(timer);
+                document.getElementById('success-image').src = currentCocktail.image;
+                document.getElementById('success-cocktail-name').textContent = currentCocktail.name;
+                document.getElementById('cocktail-description').textContent = currentCocktail.description;
+                document.getElementById('success-name').textContent = customerName;
+                document.getElementById('success-modal').style.display = 'flex';
+                
+                // Update certificate preview
+                document.getElementById('cert-name').textContent = customerName;
+                document.getElementById('cert-cocktail').textContent = currentCocktail.name;
+                document.getElementById('cert-date').textContent = new Date().toLocaleDateString('en-US', { 
+                    year: 'numeric', month: 'long', day: 'numeric' 
+                });
+            } else {
+                wrongAttempts++;
+                updateHintLevels();
+                
+                // Show appropriate hint based on wrong attempts
+                const hintMessage = document.getElementById('hint-message');
+                hintMessage.style.display = 'block';
+                
+                if (wrongAttempts === 1) {
+                    // First hint: How many ingredients are correct
+                    const correctCount = selectedIngredients.filter(ing => 
+                        currentCocktail.correct.includes(ing)).length;
+                    hintMessage.textContent = `You have ${correctCount} correct ingredients out of ${currentCocktail.correct.length}.`;
+                } 
+                else if (wrongAttempts === 2) {
+                    // Second hint: Which categories are needed
+                    const categories = currentCocktail.correct.map(ing => {
+                        if (ing.match(/liqueur|syrup|vermouth/i)) return "Sweetener";
+                        if (ing.match(/gin|vodka|whisky|aperol/i)) return "Alcohol Base";
+                        if (ing.match(/fruit|berry|citrus/i)) return "Fruit Component";
+                        if (ing.match(/herb|spice|flower/i)) return "Herbal Note";
+                        return "Other";
+                    });
+                    
+                    const uniqueCategories = [...new Set(categories)];
+                    hintMessage.textContent = `This cocktail needs: ${uniqueCategories.join(', ')}`;
+                } 
+                else {
+                    // Third hint: Show all correct ingredients
+                    hintMessage.textContent = `The correct ingredients are: ${currentCocktail.correct.join(', ')}`;
+                    clearInterval(timer);
+                    showFail("You've used all your hints. The correct ingredients were shown.");
+                }
+            }
+        }
+        
+        function updateHintLevels() {
+            // Update the visual hint level indicators
+            document.getElementById('hint-level-1').classList.toggle('active', wrongAttempts >= 1);
+            document.getElementById('hint-level-2').classList.toggle('active', wrongAttempts >= 2);
+            document.getElementById('hint-level-3').classList.toggle('active', wrongAttempts >= 3);
+        }
+
+        function showFail(message) {
+            document.getElementById('fail-message').textContent = message;
+            document.getElementById('fail-name').textContent = customerName;
+            document.getElementById('fail-modal').style.display = 'flex';
+        }
+
+        function restartGame() {
+            document.getElementById('fail-modal').style.display = 'none';
+            selectedIngredients = [];
+            timeLeft = 180;
+            updateTimer();
+            timer = setInterval(updateTimer, 1000);
+            
+            // Keep the same hint level when retrying
+            const hintMessage = document.getElementById('hint-message');
+            if (wrongAttempts >= 3) {
+                hintMessage.textContent = `The correct ingredients are: ${currentCocktail.correct.join(', ')}`;
+            }
+            hintMessage.style.display = 'block';
+        }
+
+        function playAgain() {
+            document.getElementById('success-modal').style.display = 'none';
+            document.getElementById('fail-modal').style.display = 'none';
+            document.getElementById('cocktail-selection').classList.add('active');
+            document.getElementById('game-screen').classList.remove('active');
+            document.getElementById('certificate-form').classList.remove('active');
+        }
+
+        function selectNewCocktail() {
+            document.getElementById('fail-modal').style.display = 'none';
+            playAgain();
+        }
+
+        function closeModal() {
+            document.getElementById('success-modal').style.display = 'none';
+            document.getElementById('welcome-screen').classList.add('active');
+        }
+
+        function showCertificateForm() {
+            document.getElementById('certificate-form').classList.add('active');
+        }
+
+        function sendCertificate() {
+            const email = document.getElementById('customer-email').value.trim();
+            const statusElement = document.getElementById('certificate-status');
+            
+            if (!email) {
+                statusElement.textContent = "Please enter a valid email address";
+                statusElement.style.color = "#ff6b6b";
+                return;
+            }
+            
+            if (!validateEmail(email)) {
+                statusElement.textContent = "Please enter a valid email format";
+                statusElement.style.color = "#ff6b6b";
+                return;
+            }
+            
+            // In a real implementation, you would send this to your server
+            // For this demo, we'll just show a success message
+            statusElement.textContent = "Certificate sent to " + email;
+            statusElement.style.color = "#d4af37";
+            
+            // Here you would typically:
+            // 1. Generate a PDF certificate on the server
+            // 2. Send it via email using a service like SendGrid
+            // 3. Handle any errors that might occur
+        }
+
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        // Initialize with music paused
+        document.addEventListener('DOMContentLoaded', function() {
+            music.pause();
+        });
+    </script>
+</body>
+</html>
